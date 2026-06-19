@@ -227,6 +227,17 @@
             android:textStyle="bold"
             android:backgroundTint="@android:color/holo_blue_dark"
             android:textColor="@android:color/white"/>
+        <Button
+            android:id="@+id/logoutBtn"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="20dp"
+            android:text="Logout Account"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="#D32F2F"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 </ScrollView>

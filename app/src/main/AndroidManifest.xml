@@ -12,20 +12,32 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.KIU_SAS">
 
+        <!-- Main Launcher Activity -->
         <activity
-            android:name=".showinfo"
-            android:exported="false" />
-
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:windowSoftInputMode="adjustResize">
-
+            android:name=".splash_screen"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Login Activity -->
+        <activity
+            android:name=".Login"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Registration Activity -->
+        <activity
+            android:name=".Register_page"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <!-- User Info / Profile Activity -->
+        <activity
+            android:name=".showinfo"
+            android:exported="false" />
 
     </application>
 
