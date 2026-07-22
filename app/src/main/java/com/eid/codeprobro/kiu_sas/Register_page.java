@@ -52,7 +52,7 @@ public class Register_page extends AppCompatActivity implements View.OnClickList
         registerlink = findViewById(R.id.registerlink);
 
         Create.setOnClickListener(this);
-        registerlink.setOnClickListener(this); // 🎯 ফিক্স: লিসেনার সেট করা হলো
+        registerlink.setOnClickListener(this);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -73,151 +73,114 @@ public class Register_page extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v) {
+        if (v.getId() == R.id.Create) {
+            String uni_name = this.University_Name.getText().toString().trim().toUpperCase().replace(" ", "_");
+            String rawname = this.Name.getText().toString().trim();
+            String rawidd = this.id.getText().toString().trim();
+            String email = this.Email.getText().toString().trim();
+            String password = this.Password.getText().toString().trim();
+            String depertment = this.Depertment.getText().toString().trim().toUpperCase().replace(" ", "_");
+            String sess = this.session.getText().toString().trim();
+            String punch = this.punchcard_no.getText().toString().trim().toUpperCase();
 
-            if (v.getId() == R.id.Create) {
-
-                String uni_name = this.University_Name.getText().toString().trim().toUpperCase().replace(" ", "_");
-                String rawname = this.Name.getText().toString().trim();
-                String rawidd = this.id.getText().toString().trim();
-                String email = this.Email.getText().toString().trim();
-                String password = this.Password.getText().toString().trim();
-                String depertment = this.Depertment.getText().toString().trim().toUpperCase().replace(" ", "_");
-                String sess = this.session.getText().toString().trim();
-                String punch = this.punchcard_no.getText().toString().trim().toUpperCase();
-
-                if (uni_name.isEmpty() || rawname.isEmpty() || rawidd.isEmpty() || punch.isEmpty() || password.isEmpty() || depertment.isEmpty() || sess.isEmpty()) {
-                    fillinfo();
-                    return;
-                }
-                if (rawidd.length() != 12) {
-                    Toast.makeText(this, "Wrong ID! ID must be exactly 12 digits long", Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                if (uni_name.contains(".") || uni_name.contains("#") || uni_name.contains("$") ||
-                        depertment.contains(".") || depertment.contains("#") || depertment.contains("$") ||
-                        punch.contains(".") || punch.contains("#") || punch.contains("$")) {
-                    Toast.makeText(this, "Special characters (., #, $) are not allowed in system IDs!", Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                try {
-                    String standardizedSession = sess.trim();
-                    if (standardizedSession.contains("-")) {
-                        String[] parts = standardizedSession.split("-");
-                        String firstPart = parts[0].trim();
-                        if (firstPart.length() >= 4) {
-                            standardizedSession = firstPart.substring(firstPart.length() - 2);
-                        } else {
-                            standardizedSession = firstPart;
-                        }
-                    } else if (standardizedSession.length() >= 4) {
-                        standardizedSession = standardizedSession.substring(standardizedSession.length() - 2);
-                    }
-                    final String finalSession = standardizedSession;
-
-                    backupUniName = uni_name;
-                    backupName = rawname;
-                    backupId = rawidd;
-                    backupEmail = email;
-                    backupPassword = password;
-                    backupDept = depertment;
-                    backupSession = finalSession;
-                    backupPunch = punch;
-
-                    String idd = rawidd.substring(0, 6);
-                    String roll = rawidd.substring(rawidd.length() - 2);
-                    String nam_ses_rol = rawname + "_" + idd + "__" + roll;
-
-                    // 🎯 ফিক্স: মেথড ডিক্লেয়ারেশন মুছে সরাসরি অবজেক্ট তৈরি করা হলো
-                    Login_Model ln = new Login_Model(nam_ses_rol, punch, rawidd, rawname, uni_name, depertment, sess, email, password);
-
-                    mAuth.createUserWithEmailAndPassword(email, password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                        @Override
-                        public void onSuccess(AuthResult authResult) {
-                            Toast.makeText(Register_page.this, "Registered successfully", Toast.LENGTH_SHORT).show();
-                            FirebaseUser fa = mAuth.getCurrentUser();
-
-                            if (fa != null) {
-                                db = FirebaseDatabase.getInstance().getReference(uni_name);
-
-                                String uid = fa.getUid();
-                                db.child("UID_Mappings").child(uid).child("department").setValue(depertment);
-                                db.child("UID_Mappings").child(uid).child("punch").setValue(punch);
-
-                                db.child(depertment).child("student").child(punch).setValue(ln).addOnCompleteListener(task -> {
-                                    if (task.isSuccessful()) {
-                                        db.child("Card_Mappings").child(punch).setValue(depertment);
-                                        Toast.makeText(Register_page.this, "CardMapping successs", Toast.LENGTH_SHORT).show();
-
-                                        fa.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void unused) {
-                                                Toast.makeText(Register_page.this, "Email sent! Please check your mailbox.", Toast.LENGTH_LONG).show();
-                                                Create.setVisibility(View.GONE);
-                                                isWaitingForVerification = true;
-                                            }
-                                        }).addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Toast.makeText(Register_page.this, "Email sending failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                            }
-                                        });
-                                    } else {
-                                        Toast.makeText(Register_page.this, "failed to card mapping and email sent", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            }
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(Register_page.this, "Failed to register: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-                } catch (Exception e) {
-                    Toast.makeText(this, "An error occurred! Please try again.", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-                }
+            if (uni_name.isEmpty() || rawname.isEmpty() || rawidd.isEmpty() || punch.isEmpty() || password.isEmpty() || depertment.isEmpty() || sess.isEmpty()) {
+                fillinfo();
+                return;
             }
+            if (rawidd.length() != 12) {
+                Toast.makeText(this, "Wrong ID! ID must be exactly 12 digits long", Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (uni_name.contains(".") || uni_name.contains("#") || uni_name.contains("$") ||
+                    depertment.contains(".") || depertment.contains("#") || depertment.contains("$") ||
+                    punch.contains(".") || punch.contains("#") || punch.contains("$")) {
+                Toast.makeText(this, "Special characters (., #, $) are not allowed!", Toast.LENGTH_LONG).show();
+                return;
+            }
+            try {
+                String standardizedSession = sess.trim();
+                if (standardizedSession.contains("-")) {
+                    String[] parts = standardizedSession.split("-");
+                    String firstPart = parts[0].trim();
+                    if (firstPart.length() >= 4) {
+                        standardizedSession = firstPart.substring(firstPart.length() - 2);
+                    } else {
+                        standardizedSession = firstPart;
+                    }
+                } else if (standardizedSession.length() >= 4) {
+                    standardizedSession = standardizedSession.substring(standardizedSession.length() - 2);
+                }
+                final String finalSession = standardizedSession;
 
-            if (v.getId() == R.id.registerlink) {
-                Intent in = new Intent(Register_page.this, Login.class);
-                startActivity(in);
-                finish();
+                backupUniName = uni_name;
+                backupName = rawname;
+                backupId = rawidd;
+                backupEmail = email;
+                backupPassword = password;
+                backupDept = depertment;
+                backupSession = finalSession;
+                backupPunch = punch;
+
+                String name = rawname.substring(0, 1).toUpperCase() + rawname.substring(1).toLowerCase();
+                String idd = rawidd.substring(0, 6);
+                String roll = rawidd.substring(rawidd.length() - 2);
+                String nam_ses_rol = name + "_" + idd + "__" + roll;
+
+                Login_Model ln = new Login_Model(nam_ses_rol, punch, rawidd, rawname, uni_name, depertment, finalSession, email, password);
+
+                mAuth.createUserWithEmailAndPassword(email, password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        FirebaseUser fa = mAuth.getCurrentUser();
+                        if (fa != null) {
+                            db = FirebaseDatabase.getInstance().getReference(uni_name);
+                            String uid = fa.getUid();
+                            db.child("UID_Mappings").child(uid).child("department").setValue(depertment);
+                            db.child("UID_Mappings").child(uid).child("punch").setValue(punch);
+
+                            db.child(depertment).child("student").child(punch).setValue(ln).addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    db.child("Card_Mappings").child(punch).setValue(depertment);
+                                    fa.sendEmailVerification().addOnSuccessListener(unused -> {
+                                        Toast.makeText(Register_page.this, "Email sent! Please check inbox.", Toast.LENGTH_LONG).show();
+                                        Create.setVisibility(View.GONE);
+                                        isWaitingForVerification = true;
+                                    });
+                                }
+                            });
+                        }
+                    }
+                }).addOnFailureListener(e -> Toast.makeText(Register_page.this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
+        if (v.getId() == R.id.registerlink) {
+            Intent in = new Intent(Register_page.this, Login.class);
+            startActivity(in);
+            finish();
+        }
+    }
 
     public void checkVerifiedAutomatic() {
         FirebaseUser fa = mAuth.getCurrentUser();
         if (fa != null) {
-            fa.reload().addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void unused) {
-                    if (fa.isEmailVerified()) {
-                        Toast.makeText(Register_page.this, "Verification successfully completed!", Toast.LENGTH_SHORT).show();
-                        isWaitingForVerification = false;
-
-                        Intent in = new Intent(Register_page.this, showinfo.class);
-                        in.putExtra("name", backupName);
-                        in.putExtra("id", backupId);
-                        in.putExtra("email", backupEmail);
-                        in.putExtra("password", backupPassword);
-                        in.putExtra("depertment", backupDept);
-                        in.putExtra("session", backupSession);
-                        in.putExtra("punch", backupPunch);
-                        in.putExtra("uni_name", backupUniName);
-
-                        startActivity(in);
-                        finish();
-                    }
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    // সাইলেন্ট এরর
+            fa.reload().addOnSuccessListener(unused -> {
+                if (fa.isEmailVerified()) {
+                    isWaitingForVerification = false;
+                    Intent in = new Intent(Register_page.this, showinfo.class);
+                    in.putExtra("name", backupName);
+                    in.putExtra("id", backupId);
+                    in.putExtra("email", backupEmail);
+                    in.putExtra("password", backupPassword);
+                    in.putExtra("depertment", backupDept);
+                    in.putExtra("session", backupSession);
+                    in.putExtra("punch", backupPunch);
+                    in.putExtra("uni_name", backupUniName);
+                    startActivity(in);
+                    finish();
                 }
             });
         }
@@ -228,7 +191,6 @@ public class Register_page extends AppCompatActivity implements View.OnClickList
         View v = lf.inflate(R.layout.success_custom_toast, (ViewGroup) findViewById(R.id.cstm_toast));
         Toast tt = new Toast(getApplicationContext());
         tt.setDuration(Toast.LENGTH_LONG);
-        tt.setGravity(Gravity.BOTTOM, 0, 0);
         tt.setView(v);
         tt.show();
     }
@@ -238,7 +200,6 @@ public class Register_page extends AppCompatActivity implements View.OnClickList
         View v = li.inflate(R.layout.fill_info, (ViewGroup) findViewById(R.id.fill_cust));
         Toast tt = new Toast(getApplicationContext());
         tt.setDuration(Toast.LENGTH_SHORT);
-        tt.setGravity(Gravity.BOTTOM, 0, 0);
         tt.setView(v);
         tt.show();
     }
@@ -248,7 +209,6 @@ public class Register_page extends AppCompatActivity implements View.OnClickList
         View v = lf.inflate(R.layout.failed_custom_toast, (ViewGroup) findViewById(R.id.failed_cstm_toast));
         Toast tt = new Toast(getApplicationContext());
         tt.setDuration(Toast.LENGTH_LONG);
-        tt.setGravity(Gravity.BOTTOM, 0, 0);
         tt.setView(v);
         tt.show();
     }

@@ -25,7 +25,7 @@ public class splash_screen extends AppCompatActivity {
         @Override
         public void run() {
             try{
-                Thread.sleep(800);
+                Thread.sleep(2200);
                 Intent in=new Intent(splash_screen.this, Register_page.class);
                 startActivity(in);
                 finish();
